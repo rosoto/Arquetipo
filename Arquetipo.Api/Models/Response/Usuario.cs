@@ -16,13 +16,13 @@ namespace Arquetipo.Api.Models.Response
         /// <example>juan.perez</example>
         [Required]
         [MaxLength(100)]
-        public string NombreUsuario { get; set; }
+        public required string NombreUsuario { get; set; }
 
         /// <summary>
         /// Hash de la contraseña del usuario. Nunca almacenar la contraseña en texto plano.
         /// </summary>
         [Required]
-        public string PasswordHash { get; set; }
+        public required string PasswordHash { get; set; }
 
         /// <summary>
         /// Roles asignados al usuario, separados por comas (ej. "Admin,User") o en formato JSON.

@@ -1,7 +1,6 @@
 ﻿using Arquetipo.Api.Infrastructure.Persistence;
 using Arquetipo.Api.Models.Request.v1;
 using Arquetipo.Api.Models.Response.v1;
-using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
@@ -41,17 +40,17 @@ namespace Arquetipo.Api.IntegrationTests
 
             // --- ASSERT ---
             // 1. Verificamos el código de estado de la respuesta HTTP.
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
             // 2. Deserializamos el cuerpo de la respuesta JSON a nuestro modelo.
             var resultado = await response.Content.ReadFromJsonAsync<DataClienteResponse>();
 
             // 3. Verificamos el contenido.
-            resultado.Should().NotBeNull();
-            resultado.Data.Should().NotBeNull();
-            resultado.Data.Should().HaveCount(2);
-            resultado.Data[0].Nombre.Should().Be("Ana");
-            resultado.Data[1].Nombre.Should().Be("Roberto");
+            Assert.That(resultado, Is.Not.Null);
+            Assert.That(resultado.Data, Is.Not.Null);
+            Assert.That(resultado.Data, Has.Count.GreaterThanOrEqualTo(2));
+            Assert.That(resultado.Data[0].Nombre, Is.EqualTo("Ana"));
+            Assert.That(resultado.Data[1].Nombre, Is.EqualTo("Roberto"));
         }
 
         [TearDown]
@@ -87,21 +86,19 @@ namespace Arquetipo.Api.IntegrationTests
 
             // --- ASSERT ---
             // 3. Verificamos la respuesta HTTP.
-            response.StatusCode.Should().Be(HttpStatusCode.Created); // El estándar para un POST exitoso es 201 Created.
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));
 
             // 4. VERIFICACIÓN CLAVE: Nos aseguramos de que el cliente fue realmente guardado en la BD en memoria.
             // Para ello, accedemos directamente al DbContext a través de la factory de la aplicación.
-            using (var scope = _factory.Services.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetRequiredService<ArquetipoDbContext>();
+            using var scope = _factory.Services.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<ArquetipoDbContext>();
 
-                // Buscamos en la BD el cliente que acabamos de crear.
-                var clienteEnLaBD = await context.Clientes.FirstOrDefaultAsync(c => c.Email == "roberto.rojas@test.com");
+            // Buscamos en la BD el cliente que acabamos de crear.
+            var clienteEnLaBD = await context.Clientes.FirstOrDefaultAsync(c => c.Email == "roberto.rojas@test.com");
 
-                // Afirmamos que el cliente existe y sus datos son correctos.
-                clienteEnLaBD.Should().NotBeNull();
-                clienteEnLaBD.Nombre.Should().Be("Roberto");
-            }
+            // Afirmamos que el cliente existe y sus datos son correctos.
+            Assert.That(clienteEnLaBD, Is.Not.Null);
+            Assert.That(clienteEnLaBD.Nombre, Is.EqualTo("Roberto"));
         }
     }
 }

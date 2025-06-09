@@ -7,7 +7,6 @@ using Arquetipo.Api.Models.Response;
 using Arquetipo.Api.Models.Response.v1;
 using Arquetipo.Api.Models.Response.v2;
 using AutoMapper;
-using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -27,12 +26,9 @@ namespace Arquetipo.Api.UnitTests
         [SetUp]
         public void Setup()
         {
-            // Creamos nuevas instancias de los mocks para asegurar que cada prueba esté aislada.
             _clienteRepositoryMock = new Mock<IClienteRepository>();
             _loggerMock = new Mock<ILogger<ClienteHandler>>();
             _mapperMock = new Mock<IMapper>();
-
-            // Creamos una instancia real del Handler, pasándole todos los mocks.
             _clienteHandler = new ClienteHandler(_clienteRepositoryMock.Object, _loggerMock.Object, _mapperMock.Object);
         }
 
@@ -52,9 +48,9 @@ namespace Arquetipo.Api.UnitTests
             var resultado = await _clienteHandler.GetClienteByIdV1Async(idCliente);
 
             // Assert
-            resultado.Should().NotBeNull();
-            resultado.Data.Should().HaveCount(1);
-            resultado.Data[0].Id.Should().Be(idCliente);
+            Assert.That(resultado, Is.Not.Null);
+            Assert.That(resultado.Data, Has.Count.EqualTo(1));
+            Assert.That(resultado.Data[0].Id, Is.EqualTo(idCliente));
         }
 
         [Test]
@@ -73,7 +69,7 @@ namespace Arquetipo.Api.UnitTests
             var resultado = await _clienteHandler.UpdateClienteV1Async(solicitudActualizar);
 
             // Assert
-            resultado.Should().BeTrue();
+            Assert.That(resultado, Is.True);
             _clienteRepositoryMock.Verify(repo => repo.ExistsAsync(idCliente), Times.Once);
             _clienteRepositoryMock.Verify(repo => repo.UpdateAsync(It.IsAny<SetCliente>()), Times.Once);
         }
@@ -91,7 +87,7 @@ namespace Arquetipo.Api.UnitTests
             var resultado = await _clienteHandler.UpdateClienteV1Async(solicitudActualizar);
 
             // Assert
-            resultado.Should().BeFalse();
+            Assert.That(resultado, Is.False);
             _clienteRepositoryMock.Verify(repo => repo.ExistsAsync(idCliente), Times.Once);
             _clienteRepositoryMock.Verify(repo => repo.UpdateAsync(It.IsAny<SetCliente>()), Times.Never);
         }
@@ -110,7 +106,7 @@ namespace Arquetipo.Api.UnitTests
             var resultado = await _clienteHandler.DeleteClienteV1Async(idCliente);
 
             // Assert
-            resultado.Should().BeTrue();
+            Assert.That(resultado, Is.True);
             _clienteRepositoryMock.Verify(repo => repo.ExistsAsync(idCliente), Times.Once);
             _clienteRepositoryMock.Verify(repo => repo.DeleteAsync(idCliente), Times.Once);
         }
@@ -126,7 +122,7 @@ namespace Arquetipo.Api.UnitTests
             var resultado = await _clienteHandler.DeleteClienteV1Async(idCliente);
 
             // Assert
-            resultado.Should().BeFalse();
+            Assert.That(resultado, Is.False);
             _clienteRepositoryMock.Verify(repo => repo.ExistsAsync(idCliente), Times.Once);
             _clienteRepositoryMock.Verify(repo => repo.DeleteAsync(It.IsAny<int?>()), Times.Never);
         }
@@ -147,9 +143,9 @@ namespace Arquetipo.Api.UnitTests
             var resultado = await _clienteHandler.GetClientesV2Async(1, 10, null);
 
             // Assert
-            resultado.Should().NotBeNull();
-            resultado.Data.Should().HaveCount(1);
-            resultado.Data[0].Email.Should().Be("ana@v2.com");
+            Assert.That(resultado, Is.Not.Null);
+            Assert.That(resultado.Data, Has.Count.EqualTo(1));
+            Assert.That(resultado.Data[0].Email, Is.EqualTo("ana@v2.com"));
         }
 
         [Test]
@@ -179,15 +175,15 @@ namespace Arquetipo.Api.UnitTests
             var setClienteFinal = new SetCliente { Id = idCliente, Nombre = "NombreV2", Apellido = "Apellido", Email = "test@test.com", Telefono = "123" };
 
             _clienteRepositoryMock.Setup(r => r.GetByIdAsync(idCliente)).ReturnsAsync(entidadExistente);
-            _mapperMock.Setup(m => m.Map(updateRequest, entidadExistente)); // Simula la actualización en la entidad
-            _mapperMock.Setup(m => m.Map<SetCliente>(entidadExistente)).Returns(setClienteFinal); // Simula el mapeo final
+            _mapperMock.Setup(m => m.Map(updateRequest, entidadExistente));
+            _mapperMock.Setup(m => m.Map<SetCliente>(entidadExistente)).Returns(setClienteFinal);
             _clienteRepositoryMock.Setup(r => r.UpdateAsync(setClienteFinal)).Returns(Task.CompletedTask);
 
             // Act
             var resultado = await _clienteHandler.UpdateClienteV2Async(updateRequest);
 
             // Assert
-            resultado.Should().BeTrue();
+            Assert.That(resultado, Is.True);
             _clienteRepositoryMock.Verify(r => r.GetByIdAsync(idCliente), Times.Once);
             _clienteRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<SetCliente>()), Times.Once);
         }
@@ -205,7 +201,7 @@ namespace Arquetipo.Api.UnitTests
             var resultado = await _clienteHandler.UpdateClienteV2Async(updateRequest);
 
             // Assert
-            resultado.Should().BeFalse();
+            Assert.That(resultado, Is.False);
             _clienteRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<SetCliente>()), Times.Never);
         }
         #endregion

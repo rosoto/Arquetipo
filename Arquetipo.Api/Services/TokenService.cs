@@ -6,21 +6,15 @@ using System.Text;
 
 namespace Arquetipo.Api.Services
 {
-    public class TokenService : ITokenService
+    public class TokenService(IConfiguration configuration) : ITokenService
     {
-        private readonly IConfiguration _configuration;
-
-        public TokenService(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
+        private readonly IConfiguration _configuration = configuration;
 
         public string GenerarToken(Usuario usuario)
         {
             var jwtSettings = _configuration.GetSection("Jwt");
             var secretKey = jwtSettings["Key"];
             var issuer = jwtSettings["Issuer"];
-            // var audience = jwtSettings["Audience"]; // Si tienes una audiencia específica
 
             if (string.IsNullOrEmpty(secretKey) || string.IsNullOrEmpty(issuer))
             {
@@ -31,12 +25,11 @@ namespace Arquetipo.Api.Services
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var claims = new List<Claim>
-        {
-            new Claim(JwtRegisteredClaimNames.Sub, usuario.NombreUsuario), // Subject (username)
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // JWT ID
-            new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()) // User ID
-            // Puedes añadir más claims, como roles, si los tienes
-        };
+            {
+                new(JwtRegisteredClaimNames.Sub, usuario.NombreUsuario),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new(ClaimTypes.NameIdentifier, usuario.Id.ToString())
+            };
 
             if (!string.IsNullOrEmpty(usuario.Roles))
             {
@@ -50,9 +43,8 @@ namespace Arquetipo.Api.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddHours(1), // Duración del token (ej. 1 hora)
+                Expires = DateTime.UtcNow.AddHours(1),
                 Issuer = issuer,
-                // Audience = audience, // Descomenta si usas Audience
                 SigningCredentials = creds
             };
 

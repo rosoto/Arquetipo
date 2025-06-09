@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿ using System.ComponentModel.DataAnnotations;
 
 namespace Arquetipo.Api.Models.Request
 {
@@ -8,8 +8,8 @@ namespace Arquetipo.Api.Models.Request
         [MinLength(3)]
         public required string NombreUsuario { get; set; }
         [Required]
-        [MinLength(6)] // Ejemplo de validación de longitud mínima
+        [MinLength(6)]
         public required string Password { get; set; }
-        public string? Roles { get; set; } // Opcional, ej. "User" o "Admin,User"
+        public string? Roles { get; set; }
     }
 }

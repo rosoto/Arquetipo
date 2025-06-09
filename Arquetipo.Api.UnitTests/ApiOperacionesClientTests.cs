@@ -1,6 +1,5 @@
 ﻿using Arquetipo.Api.Models.Response.ApiOperaciones;
 using Arquetipo.Api.Services;
-using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -70,21 +69,23 @@ namespace Arquetipo.Api.UnitTests
             var resultado = await _apiClient.GetTasaDeCambioAsync(new DateTime(2025, 6, 6), "UF");
 
             // Assert
-            resultado.Should().NotBeNull();
-            resultado.Data.Should().HaveCount(1);
-            resultado.Data[0].TasaCambio.Should().Be(36.5m);
+            Assert.That(resultado, Is.Not.Null);
+            Assert.That(resultado.Data, Has.Count.EqualTo(1));
+            Assert.That(resultado.Data[0].TasaCambio, Is.EqualTo(36.5m));
         }
 
         [Test]
-        public async Task GetTasaDeCambioAsync_CuandoApiDevuelveError_DebeLanzarHttpRequestException()
+        public Task GetTasaDeCambioAsync_CuandoApiDevuelveError_DebeLanzarHttpRequestException()
         {
             // Arrange
             var httpResponse = new HttpResponseMessage { StatusCode = HttpStatusCode.InternalServerError, Content = new StringContent("Error interno") };
             _httpMessageHandlerMock.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(httpResponse);
 
             // Act & Assert
-            Func<Task> act = async () => await _apiClient.GetTasaDeCambioAsync(new DateTime(2025, 6, 6), "UF");
-            await act.Should().ThrowAsync<HttpRequestException>();
+            Assert.ThrowsAsync<HttpRequestException>(async () =>
+                await _apiClient.GetTasaDeCambioAsync(new DateTime(2025, 6, 6), "UF")
+            );
+            return Task.CompletedTask;
         }
         #endregion
 
@@ -107,9 +108,9 @@ namespace Arquetipo.Api.UnitTests
             var resultado = await _apiClient.GetTasaDeCambioAsync(new DateTime(2025, 6, 7), "USD");
 
             // Assert
-            resultado.Should().NotBeNull();
-            resultado.Data.Should().BeEmpty();
-            resultado.Comentario.Should().Be("Sin datos");
+            Assert.That(resultado, Is.Not.Null);
+            Assert.That(resultado.Data, Is.Empty);
+            Assert.That(resultado.Comentario, Is.EqualTo("Sin datos"));
         }
 
         [Test]
@@ -130,8 +131,8 @@ namespace Arquetipo.Api.UnitTests
             var resultado = await _apiClient.GetFeriadosLegalesAsync(DateTime.Now, DateTime.Now.AddDays(1));
 
             // Assert
-            resultado.Should().NotBeNull();
-            resultado.Data.Should().BeEmpty(); // El cliente debe convertir el nulo en una lista vacía
+            Assert.That(resultado, Is.Not.Null);
+            Assert.That(resultado.Data, Is.Empty);
         }
         #endregion
 
@@ -161,7 +162,7 @@ namespace Arquetipo.Api.UnitTests
             // Act
             await _apiClient.GetTasaDeCambioAsync(DateTime.Now, "UF");
 
-            
+
             // Assert
             // La aserción principal está implícita en la configuración del mock.
             // Si la petición no cumple con las condiciones, el mock lanzará una excepción.

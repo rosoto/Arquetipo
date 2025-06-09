@@ -12,8 +12,8 @@ public class CrearClienteRequestV2
     [EmailAddress(ErrorMessage = "El campo Email no contiene un formato válido.")]
     public required string Email { get; set; }
 
-    public string? Telefono { get; set; } // Telefono opcional en V2
+    public string? Telefono { get; set; }
 
     [MaxLength(50)]
-    public string? PreferenciaContacto { get; set; } // Nuevo campo
+    public string? PreferenciaContacto { get; set; }
 }
