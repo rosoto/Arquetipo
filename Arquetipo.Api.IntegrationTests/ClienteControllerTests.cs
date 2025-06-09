@@ -49,8 +49,11 @@ namespace Arquetipo.Api.IntegrationTests
             Assert.That(resultado, Is.Not.Null);
             Assert.That(resultado.Data, Is.Not.Null);
             Assert.That(resultado.Data, Has.Count.GreaterThanOrEqualTo(2));
-            Assert.That(resultado.Data[0].Nombre, Is.EqualTo("Ana"));
-            Assert.That(resultado.Data[1].Nombre, Is.EqualTo("Roberto"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(resultado.Data[0].Nombre, Is.EqualTo("Ana"));
+                Assert.That(resultado.Data[1].Nombre, Is.EqualTo("Roberto"));
+            });
         }
 
         [TearDown]

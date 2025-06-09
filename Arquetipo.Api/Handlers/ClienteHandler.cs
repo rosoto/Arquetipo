@@ -144,7 +144,7 @@ public class ClienteHandler(IClienteRepository clienteRepository, ILogger<Client
     {
         var repoSetClienteList = _mapper.Map<List<SetCliente>>(clientes);
 
-        if (repoSetClienteList.Any())
+        if (repoSetClienteList.Count != 0)
         {
             _logger.LogInformation("Handler V2: Creando {Count} clientes.", repoSetClienteList.Count);
             await _clienteRepository.AddClientesAsync(repoSetClienteList);

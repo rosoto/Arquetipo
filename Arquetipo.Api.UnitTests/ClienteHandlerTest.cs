@@ -133,8 +133,8 @@ namespace Arquetipo.Api.UnitTests
         public async Task GetClientesV2Async_CuandoHayClientes_DebeMapearAResponseV2()
         {
             // Arrange
-            var clientesDePrueba = new List<Cliente> { new Cliente { Id = 1, Nombre = "Ana", Apellido = "Sosa", Email = "ana@v2.com", Telefono = "111" } };
-            var responseDePrueba = new List<ClienteResponseV2> { new ClienteResponseV2 { Id = 1, Nombre = "Ana", Apellido = "Sosa", Email = "ana@v2.com" } };
+            var clientesDePrueba = new List<Cliente> { new() { Id = 1, Nombre = "Ana", Apellido = "Sosa", Email = "ana@v2.com", Telefono = "111" } };
+            var responseDePrueba = new List<ClienteResponseV2> { new() { Id = 1, Nombre = "Ana", Apellido = "Sosa", Email = "ana@v2.com" } };
 
             _clienteRepositoryMock.Setup(repo => repo.GetAllAsync(1, 10)).ReturnsAsync(clientesDePrueba);
             _mapperMock.Setup(m => m.Map<List<ClienteResponseV2>>(clientesDePrueba)).Returns(responseDePrueba);
@@ -152,8 +152,8 @@ namespace Arquetipo.Api.UnitTests
         public async Task PostClientesV2Async_ConClientesValidos_DebeLlamarAlRepositorio()
         {
             // Arrange
-            var request = new List<CrearClienteRequestV2> { new CrearClienteRequestV2 { Nombre = "Nuevo", Apellido = "Cliente V2", Email = "v2@test.com" } };
-            var repoList = new List<SetCliente> { new SetCliente { Nombre = "Nuevo", Apellido = "Cliente V2", Email = "v2@test.com", Telefono = "N/A" } };
+            var request = new List<CrearClienteRequestV2> { new() { Nombre = "Nuevo", Apellido = "Cliente V2", Email = "v2@test.com" } };
+            var repoList = new List<SetCliente> { new() { Nombre = "Nuevo", Apellido = "Cliente V2", Email = "v2@test.com", Telefono = "N/A" } };
 
             _mapperMock.Setup(m => m.Map<List<SetCliente>>(request)).Returns(repoList);
             _clienteRepositoryMock.Setup(r => r.AddClientesAsync(repoList)).Returns(Task.CompletedTask);
@@ -195,7 +195,7 @@ namespace Arquetipo.Api.UnitTests
             var idCliente = 999;
             var updateRequest = new ActualizarClienteRequestV2 { Id = idCliente };
 
-            _clienteRepositoryMock.Setup(r => r.GetByIdAsync(idCliente)).ReturnsAsync((Cliente)null);
+            _clienteRepositoryMock.Setup(r => r.GetByIdAsync(idCliente)).ReturnsAsync((Cliente?)null);
 
             // Act
             var resultado = await _clienteHandler.UpdateClienteV2Async(updateRequest);

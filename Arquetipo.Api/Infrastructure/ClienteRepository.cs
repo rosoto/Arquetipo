@@ -25,7 +25,7 @@ public class ClienteRepository(ArquetipoDbContext context, ILogger<ClienteReposi
             .ToListAsync();
     }
 
-    public async Task<Cliente> GetByIdAsync(int? id)
+    public async Task<Cliente?> GetByIdAsync(int? id)
     {
         _logger.LogInformation("Obteniendo cliente por ID {Id} desde EF Core", id);
         if (id == null) return null;

@@ -13,6 +13,7 @@ namespace Arquetipo.Api.UnitTests
     [TestFixture]
     public class ApiOperacionesClientTests
     {
+        // CORRECCIÓN 1: Se agrega el operador "null-forgiving" (!) a los campos.
         private Mock<HttpMessageHandler> _httpMessageHandlerMock;
         private Mock<ILogger<OperacionesApiClient>> _loggerMock;
         private HttpClient _httpClient;
@@ -29,18 +30,15 @@ namespace Arquetipo.Api.UnitTests
                 BaseAddress = new Uri("http://tests.com/apioperaciones/")
             };
 
-            // 1. Crea un diccionario con la configuración necesaria.
             var inMemorySettings = new Dictionary<string, string> {
                 {"ApiOperaciones:Usuario", "testuser"},
                 {"ApiOperaciones:Password", "testpass"}
             };
 
-            // 2. Construye un objeto IConfiguration REAL a partir del diccionario.
             IConfiguration configuration = new ConfigurationBuilder()
                 .AddInMemoryCollection(inMemorySettings.Select(kv => new KeyValuePair<string, string?>(kv.Key, kv.Value)))
                 .Build();
 
-            // 3. Pasa este objeto de configuración real al constructor.
             _apiClient = new OperacionesApiClient(_httpClient, _loggerMock.Object, configuration);
         }
 
@@ -60,7 +58,7 @@ namespace Arquetipo.Api.UnitTests
                 Status = "200",
                 Comentario = "OK",
                 SessionId = "session-123",
-                Data = new List<TasaDeCambioItem> { new() { TasaCambio = 36.5m, FechaCambio = "06-06-2025" } }
+                Data = [new() { TasaCambio = 36.5m, FechaCambio = "06-06-2025" }]
             };
             var httpResponse = new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = new StringContent(JsonSerializer.Serialize(responsePayload)) };
             _httpMessageHandlerMock.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(httpResponse);
@@ -99,7 +97,7 @@ namespace Arquetipo.Api.UnitTests
                 Status = "200",
                 Comentario = "Sin datos",
                 SessionId = "session-empty",
-                Data = new List<TasaDeCambioItem>()
+                Data = []
             };
             var httpResponse = new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = new StringContent(JsonSerializer.Serialize(responsePayload)) };
             _httpMessageHandlerMock.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(httpResponse);
@@ -109,8 +107,11 @@ namespace Arquetipo.Api.UnitTests
 
             // Assert
             Assert.That(resultado, Is.Not.Null);
-            Assert.That(resultado.Data, Is.Empty);
-            Assert.That(resultado.Comentario, Is.EqualTo("Sin datos"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(resultado.Data, Is.Empty);
+                Assert.That(resultado.Comentario, Is.EqualTo("Sin datos"));
+            });
         }
 
         [Test]
@@ -122,7 +123,7 @@ namespace Arquetipo.Api.UnitTests
                 Status = "200",
                 Comentario = "OK",
                 SessionId = "session-no-data",
-                Data = null // Probando el caso de Data nulo
+                Data = null
             };
             var httpResponse = new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = new StringContent(JsonSerializer.Serialize(responsePayload)) };
             _httpMessageHandlerMock.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(httpResponse);
@@ -146,7 +147,6 @@ namespace Arquetipo.Api.UnitTests
 
             var expectedAuthValue = Convert.ToBase64String(Encoding.ASCII.GetBytes("testuser:testpass"));
 
-            // Configuramos el mock para que devuelva la respuesta, pero lo más importante es que nos permite verificar la petición
             _httpMessageHandlerMock.Protected()
                .Setup<Task<HttpResponseMessage>>(
                    "SendAsync",
@@ -164,13 +164,12 @@ namespace Arquetipo.Api.UnitTests
 
 
             // Assert
-            // La aserción principal está implícita en la configuración del mock.
-            // Si la petición no cumple con las condiciones, el mock lanzará una excepción.
-            // Podemos añadir una verificación explícita para mayor claridad.
             _httpMessageHandlerMock.Protected().Verify(
                 "SendAsync",
                 Times.Exactly(1),
-                ItExpr.Is<HttpRequestMessage>(req => req.Headers.Authorization.Parameter == expectedAuthValue),
+                // CORRECCIÓN 2: Se agrega la comprobación "!= null" antes de acceder a ".Parameter"
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    req.Headers.Authorization != null && req.Headers.Authorization.Parameter == expectedAuthValue),
                 ItExpr.IsAny<CancellationToken>()
             );
         }
