@@ -1,0 +1,13 @@
+﻿[*.cs]
+
+# CS8603: Posible tipo de valor devuelto de referencia nulo
+dotnet_diagnostic.CS8603.severity = none
+
+# CS8601: Posible asignación de referencia nula
+dotnet_diagnostic.CS8601.severity = none
+
+# CS8602: Desreferencia de una referencia posiblemente NULL.
+dotnet_diagnostic.CS8602.severity = none
+
+# CA1050: Declarar tipos en espacios de nombres
+dotnet_diagnostic.CA1050.severity = none
